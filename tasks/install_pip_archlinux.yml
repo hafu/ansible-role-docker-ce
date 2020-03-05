@@ -1,0 +1,6 @@
+---
+
+- name: install python-pip
+  package:
+    name: python-pip
+    state: present

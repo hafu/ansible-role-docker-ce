@@ -1,0 +1,19 @@
+---
+docker_ce_conflicting_packages:
+  - docker
+  - docker-engine
+  - docker.io
+  - containerd
+  - runc
+
+docker_ce_required_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg2
+  - software-properties-common
+
+docker_ce_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io

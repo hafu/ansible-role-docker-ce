@@ -1,0 +1,16 @@
+---
+# vars file for docker-ce
+
+# packages from distro repository (will be set in vars/*.yml)
+docker_ce_conflicting_packages: []
+
+# packages that are needed to activate the repository (debian based systems)
+docker_ce_required_packages: []
+
+docker_ce_apt_key_id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+docker_ce_apt_key_fallback_url: https://download.docker.com/linux/debian/gpg
+# this will be used for the apt repository
+docker_ce_apt_base_url: https://download.docker.com/linux/
+
+# this holds the main docker packages to install (will be set in vars/*.yml)
+docker_ce_packages: []

@@ -1,0 +1,109 @@
+---
+# tasks file for docker-ce
+
+- name: gather os specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - >
+      vars/{{ ansible_distribution|lower }}-
+      {{ ansible_distribution_major_version|lower }}.yml
+    - "vars/{{ ansible_distribution|lower }}.yml"
+    - "vars/{{ ansible_os_family|lower }}.yml"
+
+- name: remove conflicting packages
+  package:
+    name: "{{ docker_ce_conflicting_packages }}"
+    state: absent
+  when: docker_ce_conflicting_packages|length > 0
+
+- name: install requiered packages
+  package:
+    name: "{{ docker_ce_required_packages }}"
+    state: present
+  when: docker_ce_required_packages|length > 0
+
+- include: setup_apt.yml
+  when: ansible_os_family|lower == "debian"
+
+- name: install docker
+  package:
+    name: "{{ docker_ce_packages }}"
+    state: present
+  when: docker_ce_packages|length > 0
+
+- name: install docker-compose (as package)
+  package:
+    name: docker-compose
+    state: present
+  when: docker_ce_install_docker_compose|default(false) and
+        not docker_ce_install_docker_compose_via_pip|default(false)
+
+- name: install pip and docker-compose
+  block:
+    - include: install_pip_debian.yml
+      when: ansible_os_family|lower == "debian"
+
+    - include: install_pip_archlinux.yml
+      when: ansible_os_family|lower == "archlinux"
+
+    - name: install docker-compose (via pip)
+      pip:
+        name: docker-compose
+  when: docker_ce_install_docker_compose|default(false) and
+        docker_ce_install_docker_compose_via_pip|default(false)
+
+- name: make sure the config directory exists
+  file:
+    path: "{{ docker_ce_daemon_conf_file|dirname }}"
+    state: directory
+    owner: root
+    group: root
+
+- name: writing daemon.conf
+  copy:
+    content: "{{ docker_ce_daemon_conf_content|to_nice_json(indent=2) }}\n"
+    dest: "{{ docker_ce_daemon_conf_file }}"
+    owner: root
+    group: root
+  notify:
+    - restart docker
+
+- name: check for userns-remap setting
+  debug:
+    msg: "userns-remap: {{ docker_ce_daemon_conf_content['userns-remap'] }}"
+  when: docker_ce_daemon_conf_content['userns-remap'] is defined
+
+- name: write subuid and subgid
+  block:
+
+    - name: write subuid
+      template:
+        src: etc/subuid.j2
+        dest: /etc/subuid
+        owner: root
+        group: root
+
+    - name: write subguid
+      template:
+        src: etc/subgid.j2
+        dest: /etc/subgid
+        owner: root
+        group: root
+
+  when: docker_ce_daemon_conf_content['userns-remap'] is defined and
+        docker_ce_subuid_subgid_create
+  # END block: write subuid and subgid
+
+- name: add users to docker group
+  user:
+    name: "{{ item }}"
+    append: true
+    groups: docker
+  with_items: "{{ docker_ce_users }}"
+  when: docker_ce_users|length > 0
+
+- name: start and enable service
+  service:
+    name: docker
+    enabled: true
+    state: started

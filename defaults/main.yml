@@ -1,0 +1,21 @@
+---
+# defaults file for docker-ce
+
+# install docker compose
+docker_ce_install_docker_compose: false
+docker_ce_install_docker_compose_via_pip: false
+
+# daemon configuration
+docker_ce_daemon_conf_file: /etc/docker/daemon.json
+# see: https://docs.docker.com/engine/reference/commandline/dockerd/
+docker_ce_daemon_conf_content: {}
+
+# users allowed to run docker commands
+docker_ce_users: []
+
+# additional the _userns-remap_ must be set in docker_ce_daemon_conf_content
+docker_ce_subuid_subgid_create: false
+docker_ce_subuids:
+  - {username: "dockremap", num_start: 100000, num_count: 65536}
+docker_ce_subgids:
+  - {username: "dockremap", num_start: 100000, num_count: 65536}

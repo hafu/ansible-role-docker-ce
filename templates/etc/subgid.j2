@@ -1,0 +1,3 @@
+{% for subgid in docker_ce_subgids %}
+{{ subgid['username'] }}:{{ subgid['num_start'] }}:{{ subgid['num_count'] }}
+{% endfor %}

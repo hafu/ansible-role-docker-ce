@@ -1,0 +1,36 @@
+---
+- name: adding apt key
+  block:
+    - name: try to get apt key via keyserver (this fails sometimes)
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: "{{ docker_ce_apt_key_id }}"
+        state: present
+  rescue:
+    - name: falling back and use url of key
+      apt_key:
+        url: "{{ docker_ce_apt_key_fallback_url }}"
+        id: "{{ docker_ce_apt_key_id }}"
+        state: present
+
+- name: install python-apt
+  package:
+    name: python-apt
+    state: present
+  when: ansible_python_version is version('3', '<')
+
+- name: install python3-apt
+  package:
+    name: python3-apt
+    state: present
+  when: ansible_python_version is version('3', '>=')
+
+# TODO: set arch - currently only amd64/x86_64 is supported
+- name: add docker repository
+  apt_repository:
+    repo: >
+      deb [arch=amd64]
+      {{ docker_ce_apt_base_url }}{{ ansible_distribution|lower }}
+      {{ ansible_distribution_release|lower }} stable"
+    state: present
+    update_cache: true

@@ -1,0 +1,3 @@
+{% for subuid in docker_ce_subuids %}
+{{ subuid['username'] }}:{{ subuid['num_start'] }}:{{ subuid['num_count'] }}
+{% endfor %}
