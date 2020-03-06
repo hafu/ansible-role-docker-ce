@@ -34,13 +34,13 @@ installed on Debian based systems.
 
 ```yaml
 # daemon configuration
-docker_ce_daemon_conf_file: /etc/docker/daemon.json
+docker_ce_daemon_json_file: /etc/docker/daemon.json
 # see: https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
-docker_ce_daemon_conf_content: {}
+docker_ce_daemon_json_content: {}
 ```
 
-The `docker_ce_daemon_conf_file` gives the path to the Docker `daemon.json` 
-file. `docker_ce_daemon_conf_content` dict will be converted 1:1 into JSON. See
+The `docker_ce_daemon_json_file` gives the path to the Docker `daemon.json` 
+file. `docker_ce_daemon_json_content` dict will be converted 1:1 into JSON. See
 the example Playbook below.
 
 ```yaml
@@ -52,7 +52,7 @@ List of users to add to the `docker` group, so that they can run docker
 commands.
 
 ```yaml
-# additional the _userns-remap_ must be set in docker_ce_daemon_conf_content
+# additional the _userns-remap_ must be set in docker_ce_daemon_json_content
 docker_ce_subuid_subgid_create: false
 docker_ce_subuids:
   - { username: "dockremap", num_start: 100000, num_count: 65536 }
@@ -62,7 +62,7 @@ docker_ce_subgids:
 ```
 
 To use *user namespace* the option `userns-remap` must be set in 
-`docker_ce_daemon_conf_content` dict. When `docker_ce_subuid_subgid_create` set
+`docker_ce_daemon_json_content` dict. When `docker_ce_subuid_subgid_create` set
 to `true` the required files `/etc/subuid` and `/etc/subgid` will be created
 with the contents of `docker_ce_subuids` respectively `docker_ce_subgids`.
 
@@ -99,7 +99,7 @@ Docker documentation: [Isolate containers with a user namespace](https://docs.do
   roles:
     - role: hafu.docker-ce
       docker_ce_install_docker_compose: true
-      docker_ce_daemon_conf_content:
+      docker_ce_daemon_json_content:
         storage-driver: "overlay2"
         userns-remap: "default"
         ipv6: true

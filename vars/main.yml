@@ -7,6 +7,9 @@ docker_ce_conflicting_packages: []
 # packages that are needed to activate the repository (debian based systems)
 docker_ce_required_packages: []
 
+# daemon configuration
+docker_ce_daemon_json_file: /etc/docker/daemon.json
+
 docker_ce_apt_key_id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 docker_ce_apt_key_fallback_url: https://download.docker.com/linux/debian/gpg
 # this will be used for the apt repository

@@ -54,15 +54,15 @@
 
 - name: make sure the config directory exists
   file:
-    path: "{{ docker_ce_daemon_conf_file|dirname }}"
+    path: "{{ docker_ce_daemon_json_file|dirname }}"
     state: directory
     owner: root
     group: root
 
-- name: writing daemon.conf
+- name: writing daemon.json
   copy:
-    content: "{{ docker_ce_daemon_conf_content|to_nice_json(indent=2) }}\n"
-    dest: "{{ docker_ce_daemon_conf_file }}"
+    content: "{{ docker_ce_daemon_json_content|to_nice_json(indent=2) }}\n"
+    dest: "{{ docker_ce_daemon_json_file }}"
     owner: root
     group: root
   notify:
@@ -70,8 +70,8 @@
 
 - name: check for userns-remap setting
   debug:
-    msg: "userns-remap: {{ docker_ce_daemon_conf_content['userns-remap'] }}"
-  when: docker_ce_daemon_conf_content['userns-remap'] is defined
+    msg: "userns-remap: {{ docker_ce_daemon_json_content['userns-remap'] }}"
+  when: docker_ce_daemon_json_content['userns-remap'] is defined
 
 - name: write subuid and subgid
   block:
@@ -90,7 +90,7 @@
         owner: root
         group: root
 
-  when: docker_ce_daemon_conf_content['userns-remap'] is defined and
+  when: docker_ce_daemon_json_content['userns-remap'] is defined and
         docker_ce_subuid_subgid_create
   # END block: write subuid and subgid
 
