@@ -21,7 +21,8 @@
     state: present
   when: docker_ce_required_packages|length > 0
 
-- include: setup_apt.yml
+- name: include setup_apt tasks
+  include_tasks: setup_apt.yml
   when: ansible_os_family|lower == "debian"
 
 - name: install docker
@@ -39,10 +40,12 @@
 
 - name: install pip and docker-compose
   block:
-    - include: install_pip_debian.yml
+    - name: include install_pip_debian tasks
+      include_tasks: install_pip_debian.yml
       when: ansible_os_family|lower == "debian"
 
-    - include: install_pip_archlinux.yml
+    - name: include install_pip_archlinux tasks
+      include_tasks: install_pip_archlinux.yml
       when: ansible_os_family|lower == "archlinux"
 
     - name: install docker-compose (via pip)
