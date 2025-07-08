@@ -1,111 +1,114 @@
 ---
 # tasks file for docker-ce
 
-- name: gather os specific variables
-  include_vars: "{{ item }}"
+- name: Gather os specific variables
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
-    - "vars/{{ ansible_distribution|lower }}-\
-      {{ ansible_distribution_major_version|lower }}.yml"
-    - "vars/{{ ansible_distribution|lower }}.yml"
-    - "vars/{{ ansible_os_family|lower }}.yml"
+    - "vars/{{ ansible_distribution | lower }}-\
+      {{ ansible_distribution_major_version | lower }}.yml"
+    - "vars/{{ ansible_distribution | lower }}.yml"
+    - "vars/{{ ansible_os_family | lower }}.yml"
 
-- name: remove conflicting packages
-  package:
+- name: Remove conflicting packages
+  ansible.builtin.package:
     name: "{{ docker_ce_conflicting_packages }}"
     state: absent
   when: docker_ce_conflicting_packages|length > 0
 
-- name: install requiered packages
-  package:
+- name: Install requiered packages
+  ansible.builtin.package:
     name: "{{ docker_ce_required_packages }}"
     state: present
   when: docker_ce_required_packages|length > 0
 
-- name: include setup_apt tasks
-  include_tasks: setup_apt.yml
+- name: Include setup_apt tasks
+  ansible.builtin.include_tasks: setup_apt.yml
   when: ansible_os_family|lower == "debian"
 
-- name: install docker
-  package:
+- name: Install docker
+  ansible.builtin.package:
     name: "{{ docker_ce_packages }}"
     state: present
   when: docker_ce_packages|length > 0
 
-- name: install docker-compose (as package)
-  package:
+- name: Install docker-compose (as package)
+  ansible.builtin.package:
     name: docker-compose
     state: present
   when: docker_ce_install_docker_compose|default(false) and
         not docker_ce_install_docker_compose_via_pip|default(false)
 
-- name: install pip and docker-compose
-  block:
-    - name: include install_pip_debian tasks
-      include_tasks: install_pip_debian.yml
-      when: ansible_os_family|lower == "debian"
-
-    - name: include install_pip_archlinux tasks
-      include_tasks: install_pip_archlinux.yml
-      when: ansible_os_family|lower == "archlinux"
-
-    - name: install docker-compose (via pip)
-      pip:
-        name: docker-compose
+- name: Install pip and docker-compose
   when: docker_ce_install_docker_compose|default(false) and
         docker_ce_install_docker_compose_via_pip|default(false)
+  block:
+    - name: Include install_pip_debian tasks
+      ansible.builtin.include_tasks: install_pip_debian.yml
+      when: ansible_os_family|lower == "debian"
 
-- name: make sure the config directory exists
-  file:
-    path: "{{ docker_ce_daemon_json_file|dirname }}"
+    - name: Include install_pip_archlinux tasks
+      ansible.builtin.include_tasks: install_pip_archlinux.yml
+      when: ansible_os_family|lower == "archlinux"
+
+    - name: Install docker-compose (via pip)
+      ansible.builtin.pip:
+        name: docker-compose
+
+- name: Make sure the config directory exists
+  ansible.builtin.file:
+    path: "{{ docker_ce_daemon_json_file | dirname }}"
     state: directory
     owner: root
     group: root
+    mode: "0755"
 
-- name: writing daemon.json
-  copy:
-    content: "{{ docker_ce_daemon_json_content|to_nice_json(indent=2) }}\n"
+- name: Writing daemon.json
+  ansible.builtin.copy:
+    content: "{{ docker_ce_daemon_json_content | to_nice_json(indent=2) }}\n"
     dest: "{{ docker_ce_daemon_json_file }}"
     owner: root
     group: root
+    mode: "0644"
   notify:
-    - restart docker
+    - Restart docker
 
-- name: check for userns-remap setting
-  debug:
+- name: Check for userns-remap setting
+  ansible.builtin.debug:
     msg: "userns-remap: {{ docker_ce_daemon_json_content['userns-remap'] }}"
   when: docker_ce_daemon_json_content['userns-remap'] is defined
 
-- name: write subuid and subgid
+- name: Write subuid and subgid
+  when: docker_ce_daemon_json_content['userns-remap'] is defined and
+        docker_ce_subuid_subgid_create
   block:
 
-    - name: write subuid
-      template:
+    - name: Write subuid
+      ansible.builtin.template:
         src: etc/subuid.j2
         dest: /etc/subuid
         owner: root
         group: root
+        mode: "0644"
 
-    - name: write subguid
-      template:
+    - name: Write subguid
+      ansible.builtin.template:
         src: etc/subgid.j2
         dest: /etc/subgid
         owner: root
         group: root
-
-  when: docker_ce_daemon_json_content['userns-remap'] is defined and
-        docker_ce_subuid_subgid_create
+        mode: "0644"
   # END block: write subuid and subgid
 
-- name: add users to docker group
-  user:
+- name: Add users to docker group
+  ansible.builtin.user:
     name: "{{ item }}"
     append: true
     groups: docker
   with_items: "{{ docker_ce_users }}"
   when: docker_ce_users|length > 0
 
-- name: start and enable service
-  service:
+- name: Start and enable service
+  ansible.builtin.service:
     name: docker
     enabled: true
     state: started

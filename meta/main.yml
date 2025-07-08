@@ -1,6 +1,7 @@
 ---
 galaxy_info:
-  role_name: docker-ce
+  role_name: docker_ce
+  namespace: hafu
   author: Hannes Fuchs
   description: >
     Installs and configures Docker CE (Community Edition). Removes conflicting
@@ -13,7 +14,7 @@ galaxy_info:
   # Choose a valid license ID from https://spdx.org - some suggested licenses:
   license: MIT
 
-  min_ansible_version: 2.1
+  min_ansible_version: "2.1"
 
   # If this a Container Enabled role, provide the minimum Ansible Container
   # version.
@@ -22,18 +23,19 @@ galaxy_info:
   # To view available platforms and versions (or releases), visit:
   # https://galaxy.ansible.com/api/v1/platforms/
   #
-  platforms:
-    - name: Ubuntu
-      versions:
-        - xenial
-        - bionic
-    - name: Debian
-      versions:
-        - buster
-        - bullseye
-    - name: ArchLinux
-      versions:
-        - any
+  # Removed https://forum.ansible.com/t/role-meta-data-platform-key-broken/4651/9
+  # platforms:
+  #   - name: Ubuntu
+  #     versions:
+  #       - xenial
+  #       - bionic
+  #   - name: Debian
+  #     versions:
+  #       - buster
+  #       - bullseye
+  #   - name: ArchLinux
+  #     versions:
+  #       - any
 
   galaxy_tags:
     - ce

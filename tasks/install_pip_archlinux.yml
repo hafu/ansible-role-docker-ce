@@ -1,6 +1,6 @@
 ---
 
-- name: install python-pip
-  package:
+- name: Install python-pip
+  ansible.builtin.package:
     name: python-pip
     state: present
